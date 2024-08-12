@@ -1,0 +1,766 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EEG RTV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+                /* Header styles */
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        #logo {
+            height: 50px; /* Adjust logo height */
+        }
+
+        #eegChart, #individualCharts {
+            margin-top: 20px;
+        }
+
+        #openFormButton {
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #openFormButton:hover {
+            background-color: #45a049;
+        }
+
+        #openKortexButton {
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #openKortexButton:hover {
+            background-color: #45a049;
+        }
+
+        #downloadDataBtn {
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #downloadDataBtn:hover {
+            background-color: #45a049;
+        }
+
+        #popupForm {
+            display: none;
+            position: fixed;
+            bottom: 1%;
+            right: 1%;
+            width: 40vw;
+            background-color: white;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 15px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .extra-field-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .extra-field-row input[type="text"] {
+            flex: 1;
+        }
+
+        #popupForm h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        #popupForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #popupForm input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #popupForm button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #popupForm button:hover {
+            background-color: #45a049;
+        }
+
+        #addFieldButton {
+            float: right;
+            background-color: #2196F3;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #addFieldButton:hover {
+            background-color: #0b7dda;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-row label {
+            flex: 0 0 50%;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-row input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            margin-bottom: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-column label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-column input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #popupForm button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #popupForm button:hover {
+            background-color: #45a049;
+        }
+        /* Additional styles for the COM port popup */
+        #comPortPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30vw;
+            background-color: white;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        #comPortPopup h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        #comPortPopup select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #comPortPopup button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+    </style>
+
+    </head>
+<body>
+{% load static %}
+    <!-- Header with logo and button -->
+<div id="header" style="
+    /* margin-right: -34px; */
+    border-radius: 10px;
+    width: 96.2vw;
+">
+        <img src="/eeg_app/static/eeg_app/images/logo.png" alt="Logo" id="logo">
+    <div style="display: flex">        <button id="openFormButton" onclick="togglePopup()" style="display: none">Open Form</button>
+        <button id="openKortexButton" onclick="toggleKortexPopup()" style="display: none; margin-left: 10px">Open Kortex</button>
+    <button type="button" id="downloadDataBtn" style="display: none; margin-left: 10px" onclick="downloadData()">Download EEG Data</button></div>
+
+    </div>
+    <!-- COM Port Selection Popup -->
+    <div id="overlay"></div>
+    <div id="comPortPopup">
+        <h3>Select COM Port</h3>
+        <button id="selectPortButton" style="margin-bottom: 15px;">Choose COM Port</button>
+        <div id="selectedPort" style="margin-bottom: 15px;"></div>
+        <div id="selectedPortName" style="margin-bottom: 15px;"></div>
+        <div id="selectedPortVendor" style="margin-bottom: 15px;"></div>
+        <button onclick="connectToComPort()">Connect</button>
+        <button onclick="closePupoup()" style="
+    margin-left: 18.8vw;
+    margin-right: 0px;
+">Close</button>
+    </div>
+
+
+    <canvas id="eegChart" width="400" height="200" style="display: none"></canvas>
+    <div id="individualCharts" style="display: none">
+        <!-- Canvases for individual channels will be inserted here -->
+    </div>
+
+    <div id="popupChat", style="position: fixed;display: none;border-radius: 10px;background: white;max-height: 72vh;max-width: 25vw;/* margin-top: 70px; */z-index: 1008;padding-top: 1px;bottom: 9%;">
+        <h3 style="text-align: center">Gemini Kortex</h3>
+<iframe src="https://kortex.neuralmedic.de/streamlit/" style="
+    border-radius: 0px 0px 10px 10px;
+    width: 24.8vw;
+    height: 72vh;
+" id="kortexChat"></iframe>
+    </div>
+
+    <div id="popupForm", style="margin-top: 82px;z-index: 1008;">
+        <h3>Metadata Form</h3>
+        <form id="metadataForm">
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="sampleRate">Sample Rate:</label>
+                    <input type="text" id="sampleRate" name="sampleRate" placeholder="Enter sample rate" required>
+                </div>
+                <div class="form-column">
+                    <label for="electrodeType">Electrode Type:</label>
+                    <input type="text" id="electrodeType" name="electrodeType" placeholder="Enter electrode type" required>
+                </div>
+                <div class="form-column">
+                    <label for="electrodeImpedance">Electrode Impedance:</label>
+                    <input type="text" id="electrodeImpedance" name="electrodeImpedance" placeholder="Enter electrode impedance" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="numberOfChannels">Number of Channels:</label>
+                    <input type="text" id="numberOfChannels" name="numberOfChannels" placeholder="Enter number of channels" required>
+                </div>
+                <div class="form-column">
+                    <label for="channelNames">Channel Names:</label>
+                    <input type="text" id="channelNames" name="channelNames" placeholder="Enter channel names" required>
+                </div>
+                <div class="form-column">
+                    <label for="channelType">Channel Type:</label>
+                    <input type="text" id="channelType" name="channelType" placeholder="Enter channel type" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="frequencyRange">Frequency Range:</label>
+                    <input type="text" id="frequencyRange" name="frequencyRange" placeholder="Enter frequency range" required>
+                </div>
+                <div class="form-column">
+                    <label for="filter">Filter:</label>
+                    <input type="text" id="filter" name="filter" placeholder="Enter filter (optional)">
+                </div>
+                <div class="form-column">
+                    <label for="units">Units:</label>
+                    <input type="text" id="units" name="units" placeholder="Enter units" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="amplifier">Amplifier:</label>
+                    <input type="text" id="amplifier" name="amplifier" placeholder="Enter amplifier (optional)">
+                </div>
+                <div class="form-column">
+                    <label for="roomTemperature">Room Temperature:</label>
+                    <input type="text" id="roomTemperature" name="roomTemperature" placeholder="Enter room temperature (default 20°C)">
+                </div>
+                <div class="form-column">
+                    <label for="lightingConditions">Lighting Conditions:</label>
+                    <input type="text" id="lightingConditions" name="lightingConditions" placeholder="Enter lighting conditions">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="comments">Comments:</label>
+                    <input type="text" id="comments" name="comments" placeholder="Enter any comments">
+                </div>
+                <div class="form-column">
+                    <label for="subjectId">Subject ID:</label>
+                    <input type="text" id="subjectId" name="subjectId" placeholder="Enter subject ID (default S1)">
+                </div>
+                <div class="form-column">
+                    <label for="subjectAge">Subject Age:</label>
+                    <input type="text" id="subjectAge" name="subjectAge" placeholder="Enter subject age" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="subjectGender">Subject Gender:</label>
+                    <input type="text" id="subjectGender" name="subjectGender" placeholder="Enter subject gender">
+                </div>
+                <div class="form-column">
+                    <label for="subjectMedicalConditions">Subject Medical Conditions:</label>
+                    <input type="text" id="subjectMedicalConditions" name="subjectMedicalConditions" placeholder="Enter medical conditions">
+                </div>
+                <div class="form-column">
+                    <label for="duration">Duration in [s]:</label>
+                    <input type="text" id="duration" name="duration" placeholder="Enter experiment duration" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="additionalNotes">Additional Notes:</label>
+                    <input type="text" id="additionalNotes" name="additionalNotes" placeholder="Enter additional notes">
+                </div>
+            </div>
+            <button type="button" onclick="sendData()">Send</button>
+        </form>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@latest/dist/chartjs-plugin-streaming.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml/dist/js-yaml.min.js"></script>
+    <script>
+        function downloadData() {
+                        // Create a temporary anchor element
+            const link = document.createElement('a');
+            // Set the href to the download URL
+            link.href = '/eeg_app/download/';
+            // Set the download attribute to trigger a download
+            link.download = 'fixed_file.txt'; // Optional: set a default file name
+            // Append the anchor to the body
+            document.body.appendChild(link);
+            // Programmatically click the anchor to trigger the download
+            link.click();
+            // Remove the anchor from the DOM
+            document.body.removeChild(link);
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('comPortPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+
+            const selectPortButton = document.getElementById('selectPortButton');
+            selectPortButton.addEventListener('click', async () => {
+                try {
+                    // Request a port and open a connection.
+                    const port = await navigator.serial.requestPort();
+                    // Get the selected port details
+                    const info = port.getInfo();
+                    const portName = `Name: UNICORN EEG, Vendor: g.tec`;
+                    document.getElementById('selectedPort').textContent = `Selected Port: COM14`;
+                    document.getElementById('selectedPortName').textContent = `Name: UNICORN EEG`;
+                    document.getElementById('selectedPortVendor').textContent = `Vendor: g.tec`;
+
+                    // Save the selected port for further actions
+                    window.selectedPort = port;
+                } catch (error) {
+                    console.error('Error selecting COM port:', error);
+                    alert('Failed to select a COM port.');
+                }
+            });
+        });
+
+        function ws_recive() {
+            // Your existing Chart.js setup code
+        const ctx = document.getElementById('eegChart').getContext('2d');
+
+        const colors = [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)'
+        ];
+
+        const datasets = Array.from({ length: 8 }, (_, i) => ({
+            label: `Channel ${i + 1}`,
+            data: [],
+            borderColor: colors[i],
+            borderWidth: 1,
+            fill: false
+        }));
+
+        const eegChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'realtime',
+                        realtime: {
+                            duration: 20000,
+                            refresh: 100,
+                            delay: 100,
+                            onRefresh: function(chart) {
+                                // Data is updated by WebSocket, no need to fetch
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const individualCharts = [];
+        const individualChartCtxs = [];
+        const individualDatasets = [];
+
+        for (let i = 0; i < 8; i++) {
+            const canvas = document.createElement('canvas');
+            canvas.id = `channelChart${i + 1}`;
+            canvas.width = 400;
+            canvas.height = 200;
+            document.getElementById('individualCharts').appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            individualChartCtxs.push(ctx);
+
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: `Channel ${i + 1}`,
+                        data: [],
+                        borderColor: colors[i],
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'realtime',
+                            realtime: {
+                                duration: 20000,
+                                refresh: 100,
+                                delay: 100,
+                                onRefresh: function(chart) {
+                                    // Data is updated by WebSocket, no need to fetch
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            individualCharts.push(chart);
+        }
+
+        const socket = new WebSocket('wss://' + window.location.host + '/ws/eeg-data/');
+        const throttleInterval = 100; // Process messages every 100 ms
+let lastMessageTime = 0;
+
+socket.onmessage = function(event) {
+    const currentTime = Date.now();
+    if (currentTime - lastMessageTime > throttleInterval) {
+        const data = JSON.parse(event.data).values;
+        data.forEach((value, index) => {
+            const timeNow = Date.now();
+            eegChart.data.datasets[index].data.push({
+                x: timeNow,
+                y: value
+            });
+            individualCharts[index].data.datasets[0].data.push({
+                x: timeNow,
+                y: value
+            });
+        });
+        eegChart.update('quiet');
+        individualCharts.forEach(chart => chart.update('quiet'));
+        lastMessageTime = currentTime;
+    }
+};
+        }
+
+        async function connectToComPort() {
+            if (!window.selectedPort) {
+                alert('Please select a COM port first.');
+                return;
+            }
+            document.getElementById('eegChart').style.display = 'block'
+            document.getElementById('individualCharts').style.display = 'block'
+            document.getElementById('openFormButton').style.display = 'block'
+            document.getElementById('openKortexButton').style.display = 'block'
+            try {
+                alert('Connected to the COM port!');
+                document.getElementById('comPortPopup').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+                ws_recive();
+
+            } catch (error) {
+                console.error('Error connecting to COM port:', error);
+                alert('Failed to connect to the COM port.');
+            }
+
+        }
+
+        function togglePopup() {
+            const popup = document.getElementById('popupForm');
+            const btn = document.getElementById('openFormButton')
+
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+            btn.textContent = btn.textContent === 'Open Form' ? 'Close Form' : 'Open Form'
+        }
+
+
+
+        function toggleKortexPopup() {
+            const popup_kortex = document.getElementById('popupChat');
+            const btn_kortex = document.getElementById('openKortexButton')
+            popup_kortex.style.display = popup_kortex.style.display === 'block' ? 'none' : 'block';
+
+            btn_kortex.textContent = btn_kortex.textContent === 'Open Kortex' ? 'Close Kortex' : 'Open Kortex'
+        }
+
+        function openPupoup(){
+            const compop = document.getElementById('comPortPopup');
+            compop.style.display = 'block'
+        }
+
+        function closePupoup(){
+            const compop = document.getElementById('comPortPopup');
+            compop.style.display = 'none'
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function addField() {
+            var extraFields = document.getElementById('extraFields');
+            var fieldWrapper = document.createElement('div');
+            fieldWrapper.className = 'extra-field-row';
+            fieldWrapper.innerHTML = `
+                <input type="text" name="extraFieldName" placeholder="Field Name">
+                <input type="text" name="extraFieldValue" placeholder="Field Value">`;
+            extraFields.appendChild(fieldWrapper);
+        }
+
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        function validateForm() {
+            var sampleRate = document.getElementById('sampleRate').value;
+            var electrodeType = document.getElementById('electrodeType').value;
+            var electrodeImpedance = document.getElementById('electrodeImpedance').value;
+            var numberOfChannels = document.getElementById('numberOfChannels').value;
+            var channelNames = document.getElementById('channelNames').value;
+            var channelType = document.getElementById('channelType').value;
+            var frequencyRange = document.getElementById('frequencyRange').value;
+            var units = document.getElementById('units').value;
+            var subjectAge = document.getElementById('subjectAge').value;
+            var duration = document.getElementById('duration').value;
+
+            if (!sampleRate || !electrodeType || !electrodeImpedance || !numberOfChannels || !channelNames || !channelType || !frequencyRange || !units || !subjectAge || !duration) {
+                alert('Please fill out all required fields.');
+                return false;
+            }
+            return true;
+        }
+
+        function sendData() {
+            if (!validateForm()) {
+                return;
+            }
+
+            var form = document.getElementById('metadataForm');
+            var formData = new FormData(form);
+            var data = {};
+
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // Generate YAML from form data
+            var yamlData = {
+                eeg_setup: {
+                    recording: {
+                        sample_rate: data.sampleRate,
+                    },
+                    electrodes: {
+                        type: data.electrodeType,
+                        impedance: data.electrodeImpedance,
+                    },
+                    channels: {
+                        number_of_channels: data.numberOfChannels,
+                        names: data.channelNames,
+                        type: data.channelType,
+                        frequency_range: data.frequencyRange,
+                        filter: data.filter,
+                        units: data.units,
+                    },
+                    hardware_setup: {
+                        amplifier: data.amplifier,
+                    },
+                    environment: {
+                        room_temperature: data.roomTemperature,
+                        lighting_conditions: data.lightingConditions,
+                    },
+                    comments: data.comments,
+                },
+                subject: {
+                    demographics: {
+                        id: data.subjectId,
+                        age: data.subjectAge,
+                        gender: data.subjectGender,
+                    },
+                    existing_issues: {
+                        medical_conditions: data.subjectMedicalConditions.split(',').map(s => s.trim()),
+                    },
+                },
+                window_details: {
+                    duration: data.duration,
+                },
+                additional_notes: data.additionalNotes,
+            };
+
+            // Convert the YAML object to a string
+            var yamlString = jsyaml.dump(yamlData);
+
+            // Create a blob and trigger a download
+            var blob = new Blob([yamlString], { type: 'text/yaml' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'metadata.yaml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            console.log(data)
+
+
+                console.log('Success:', data);
+                alert('Data Successfully Saved');
+                togglePopup(); // Close the form after sending data
+                        // Show the download button after the specified duration
+                                    var durationInSeconds = parseInt(data.duration, 10); // Ensure duration is an integer
+                console.log("Time")
+                console.log(data.duration)
+                console.log(durationInSeconds)
+                integer_seconds = parseInt(durationInSeconds)
+            console.log(integer_seconds)
+            setTimeout(() => {
+                    document.getElementById('downloadDataBtn').style.display = 'block';
+                }, integer_seconds * 1000); // Convert seconds to milliseconds
+        }
+
+
+    </script>
+</body>
+</html>

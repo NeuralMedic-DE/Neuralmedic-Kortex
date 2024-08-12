@@ -1,0 +1,43 @@
+eeg_setup:
+  recording:
+    sample_rate: {{ sample_rate }} # Sample rate of the recording, required
+
+  electrodes:
+    type: {{ electrode_type }} # Type or model of the electrode cap used, required
+    impedance: {{ electrode_impedance }} # Impedance of the electrodes, required
+
+  channels:
+    number_of_channels: {{ number_of_channels }}  # Number of channels in the recording, required
+    names: {{ channel_names }}  # Name of all channels, auto-generate if empty e.g. Ch1, Ch2 
+    type: {{ channel_type }}  # Type of the channel, required
+    frequency_range: {{ frequency_range }}  # Frequency range, required
+    filter: {{ filter }}  # Filter applied, optional
+    units: {{ units }}  # Units of measurement, required
+    
+  hardware_setup:
+    amplifier: {{ amplifier }}  # Model of the amplifier used, optional
+
+  environment:
+    room_temperature: {{ room_temperature }}  # Room temperature during the recording, optional, default display = 20 degreee Celsius
+    lighting_conditions: {{ lighting_conditions }}  # Lighting conditions in the room, optional
+
+  comments: {{ comments }}  # Any additional comments about the recording, optional
+
+subject:
+  demographics:
+    id: {{ subject_id }}  # Unique identifier for the subject, optional, default display - S1
+    age: {{ subject_age }}  # Age of the subject, required
+    gender: {{ subject_gender }}  # Gender of the subject, optional
+
+  existing_issues:
+    medical_conditions:  # List of any existing medical conditions, optional
+      {% spaceless %}
+      {% for condition in subject_medical_conditions %}
+      - {{ condition }}
+      {% endfor %}
+      {% endspaceless %}
+
+window_details:
+  duration: {{ duration }}  # Duration of the experiment, required
+
+additional_notes: {{ additional_notes }}  # Any extra notes or observations, optional
